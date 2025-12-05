@@ -18,6 +18,10 @@ Flux-Dev Demo: https://huggingface.co/spaces/ChenDY/NAG_FLUX.1-dev
 
 ## News
 
+2025-12-05: `Qwen Image` models are now supported!
+
+2025-12-05: Fixed import issues with `DoubleStreamBlock` and `SingleStreamBlock` for better compatibility.
+
 2025-07-02: `HiDream` is now supported!
 
 2025-07-02: Add support for `TeaCache` and `WaveSpeed` to accelerate NAG sampling!
@@ -36,14 +40,34 @@ Flux-Dev Demo: https://huggingface.co/spaces/ChenDY/NAG_FLUX.1-dev
 
 - `NAGCFGGuider`
 - `KSamplerWithNAG`
+- `KSamplerWithNAG (Advanced)`
+- `SamplerCustomWithNAG`
+- `BasicGuider` (with NAG support)
 
 ## Usage
 
 To use NAG, simply replace the `CFGGuider` node with `NAGCFGGuider`, or the `KSampler` node with `KSamplerWithNAG` in your workflow.
 
-We currently support `Flux`, `Flux Kontext`, `Wan`, `Vace Wan`, `Hunyuan Video`, `Choroma`, `SD3.5`, `SDXL` and `SD`.
+We currently support `Flux`, `Flux Kontext`, `Wan`, `Vace Wan`, `Hunyuan Video`, `Chroma`, `Qwen Image`, `SD3.5`, `SDXL` and `SD`.
 
 Example workflows are available in the `./workflows` directory!
+
+## Implementation Details
+
+### Model Support Architecture
+
+NAG works by modifying attention mechanisms during the diffusion process. Each supported model type has its own specialized switch class that:
+
+1. **Detects Model Type**: Automatically identifies the model architecture
+2. **Hooks Attention Layers**: Wraps attention operations to apply negative guidance
+3. **Manages Batch Splitting**: Handles positive/negative conditioning separation
+4. **Applies NAG Guidance**: Uses the `nag()` function to enhance negative prompting effectiveness
+
+### Recent Improvements
+
+- **Qwen Image Support**: Added complete NAG integration for QwenImageTransformer2DModel with custom attention hooks
+- **Import Stability**: Fixed deprecated imports from `chroma.layers` to `flux.layers` for better compatibility
+- **Batch Management**: Improved handling of conditioning batch expansion across all model types
 
 ## Key Inputs
 

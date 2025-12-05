@@ -3,59 +3,32 @@ import torch
 
 
 def nag(z_positive, z_negative, scale, tau, alpha):
-    m = min(z_positive.shape[0], z_negative.shape[0])
-    if m == 0:
-        return z_negative
-    z_positive = z_positive[-m:]
-    z_negative = z_negative[-m:]
     z_guidance = z_positive * scale - z_negative * (scale - 1)
+    norm_positive = torch.norm(z_positive, p=1, dim=-1, keepdim=True).expand(*z_positive.shape)
+    norm_guidance = torch.norm(z_guidance, p=1, dim=-1, keepdim=True).expand(*z_guidance.shape)
 
-    eps = 1e-6
-    norm_positive = (
-        torch.norm(z_positive, p=1, dim=-1, keepdim=True)
-        .clamp_min(eps)
-        .expand_as(z_positive)
-    )
-    norm_guidance = (
-        torch.norm(z_guidance, p=1, dim=-1, keepdim=True)
-        .clamp_min(eps)
-        .expand_as(z_guidance)
-    )
-
-    s = norm_guidance / norm_positive
-    z_guidance = z_guidance * torch.minimum(s, s.new_full((1,), tau)) / s
+    scale = norm_guidance / norm_positive
+    z_guidance = z_guidance * torch.minimum(scale, scale.new_ones(1) * tau) / scale
 
     z_guidance = z_guidance * alpha + z_positive * (1 - alpha)
-
+    
     return z_guidance
 
 
-def cat_context(context, nag_negative_context, trim_context=False, dim=1):
-    assert dim in [1, 2]
+def cat_context(context, nag_negative_context, trim_context=False):
     nag_negative_context = nag_negative_context.to(context)
 
-    context_len = context.shape[dim]
-    nag_neg_context_len = nag_negative_context.shape[dim]
+    context_len = context.shape[1]
+    nag_neg_context_len = nag_negative_context.shape[1]
 
     if context_len < nag_neg_context_len:
-        if dim == 1:
-            context = context.repeat(1, math.ceil(nag_neg_context_len / context_len), 1)
-            if trim_context:
-                context = context[:, -nag_neg_context_len:]
-        else:
-            context = context.repeat(1, 1, math.ceil(nag_neg_context_len / context_len), 1)
-            if trim_context:
-                context = context[:, :, -nag_neg_context_len:]
+        context = context.repeat(1, math.ceil(nag_neg_context_len / context_len), 1)
+        if trim_context:
+            context = context[:, -nag_neg_context_len:]
+        context_len = context.shape[1]
 
-        context_len = context.shape[dim]
-
-    if dim == 1:
-        nag_negative_context = nag_negative_context.repeat(1, math.ceil(context_len / nag_neg_context_len), 1)
-        nag_negative_context = nag_negative_context[:, -context_len:]
-    else:
-        nag_negative_context = nag_negative_context.repeat(1, 1, math.ceil(context_len / nag_neg_context_len), 1)
-        nag_negative_context = nag_negative_context[:, :, -context_len:]
-
+    nag_negative_context = nag_negative_context.repeat(1, math.ceil(context_len / nag_neg_context_len), 1)
+    nag_negative_context = nag_negative_context[:, -context_len:]
 
     return torch.cat([context, nag_negative_context], dim=0)
 

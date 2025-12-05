@@ -7,7 +7,7 @@ from einops import rearrange, repeat
 import comfy.ldm.common_dit
 
 from comfy.ldm.flux.layers import timestep_embedding
-from comfy.ldm.chroma.layers import (
+from comfy.ldm.flux.layers import (
     DoubleStreamBlock,
     SingleStreamBlock,
 )
@@ -88,8 +88,7 @@ class NAGChroma(Chroma):
                                                                "vec": double_mod,
                                                                "pe": pe,
                                                                "pe_negative": pe_negative,
-                                                               "attn_mask": attn_mask,
-                                                               "transformer_options": transformer_options},
+                                                               "attn_mask": attn_mask},
                                                               {"original_block": block_wrap})
                     txt = out["txt"]
                     img = out["img"]
@@ -128,13 +127,11 @@ class NAGChroma(Chroma):
                                                                "vec": single_mod,
                                                                "pe": pe,
                                                                "pe_negative": pe_negative,
-                                                               "attn_mask": attn_mask,
-                                                               "transformer_options": transformer_options},
+                                                               "attn_mask": attn_mask},
                                                               {"original_block": block_wrap})
                     img = out["img"]
                 else:
-                    img = block(img, vec=single_mod, pe=pe, pe_negative=pe_negative,
-                                attn_mask=attn_mask)
+                    img = block(img, vec=single_mod, pe=pe, pe_negative=pe_negative, attn_mask=attn_mask)
 
                 if control is not None: # Controlnet
                     control_o = control.get("output")

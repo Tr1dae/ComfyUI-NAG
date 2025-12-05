@@ -81,8 +81,7 @@ class NAGFlux(Flux):
                                                            "vec": vec,
                                                            "pe": pe,
                                                            "pe_negative": pe_negative,
-                                                           "attn_mask": attn_mask,
-                                                           "transformer_options": transformer_options},
+                                                           "attn_mask": attn_mask},
                                                           {"original_block": block_wrap})
                 txt = out["txt"]
                 img = out["img"]
@@ -122,8 +121,7 @@ class NAGFlux(Flux):
                                                            "vec": vec,
                                                            "pe": pe,
                                                            "pe_negative": pe_negative,
-                                                           "attn_mask": attn_mask,
-                                                           "transformer_options": transformer_options},
+                                                           "attn_mask": attn_mask},
                                                           {"original_block": block_wrap})
                 img = out["img"]
             else:
@@ -239,8 +237,7 @@ class NAGFlux(Flux):
                                                                "vec": vec,
                                                                "pe": pe,
                                                                "pe_negative": pe_negative,
-                                                               "attn_mask": attn_mask,
-                                                               "transformer_options": transformer_options},
+                                                               "attn_mask": attn_mask},
                                                               {"original_block": block_wrap})
                     txt = out["txt"]
                     img = out["img"]
@@ -280,8 +277,7 @@ class NAGFlux(Flux):
                                                                "vec": vec,
                                                                "pe": pe,
                                                                "pe_negative": pe_negative,
-                                                               "attn_mask": attn_mask,
-                                                               "transformer_options": transformer_options},
+                                                               "attn_mask": attn_mask},
                                                               {"original_block": block_wrap})
                     img = out["img"]
                 else:
@@ -384,8 +380,7 @@ class NAGFlux(Flux):
                                                            "vec": vec,
                                                            "pe": pe,
                                                            "pe_negative": pe_negative,
-                                                           "attn_mask": attn_mask,
-                                                           "transformer_options": transformer_options},
+                                                           "attn_mask": attn_mask},
                                                           {"original_block": block_wrap})
                 txt = out["txt"]
                 img = out["img"]
@@ -426,14 +421,12 @@ class NAGFlux(Flux):
                                            attn_mask=args.get("attn_mask"))
                         return out
 
-                    out = blocks_replace[("single_block", i)]({
-                        "img": img,
-                        "vec": vec,
-                        "pe": pe,
-                        "pe_negative": pe_negative,
-                        "attn_mask": attn_mask,
-                        "transformer_options": transformer_options,
-                    }, {"original_block": block_wrap})
+                    out = blocks_replace[("single_block", i)]({"img": img,
+                                                               "vec": vec,
+                                                               "pe": pe,
+                                                               "pe_negative": pe_negative,
+                                                               "attn_mask": attn_mask},
+                                                              {"original_block": block_wrap})
                     img = out["img"]
                 else:
                     img = block(img, vec=vec, pe=pe, pe_negative=pe_negative, attn_mask=attn_mask)

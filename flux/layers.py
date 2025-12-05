@@ -33,8 +33,6 @@ class NAGDoubleStreamBlock(DoubleStreamBlock):
             modulation_dims_txt=None,
             context_pad_len: int = 0,
             nag_pad_len: int = 0,
-            transformer_options=None,
-            **kwargs,
     ):
         origin_bsz = len(txt) - len(img)
         assert origin_bsz != 0
@@ -154,8 +152,6 @@ class NAGSingleStreamBlock(SingleStreamBlock):
             origin_bsz: int = None,
             context_pad_len: int = 0,
             nag_pad_len: int = 0,
-            transformer_options=None,
-            **kwargs,
     ) -> Tensor:
         mod= self.modulation(vec)[0]
         qkv, mlp = torch.split(self.linear1(apply_mod(self.pre_norm(x), (1 + mod.scale), mod.shift, modulation_dims)), [3 * self.hidden_size, self.mlp_hidden_dim], dim=-1)

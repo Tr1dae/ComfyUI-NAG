@@ -140,8 +140,6 @@ class NAGHiDreamImageTransformerBlock(HiDreamImageTransformerBlock):
         text_tokens: Optional[torch.FloatTensor] = None,
         adaln_input: Optional[torch.FloatTensor] = None,
         rope: torch.FloatTensor = None,
-        transformer_options=None,
-        **kwargs,
     ) -> torch.FloatTensor:
         wtype = image_tokens.dtype
         shift_msa_i, scale_msa_i, gate_msa_i, shift_mlp_i, scale_mlp_i, gate_mlp_i, \
@@ -327,11 +325,10 @@ class NAGHiDreamImageTransformer2DModel(HiDreamImageTransformer2DModel):
         if apply_nag:
             y = torch.cat((y, nag_negative_y.to(y)), dim=0)
             context = cat_context(context, nag_negative_context)
-            encoder_hidden_states_llama3 = cat_context(
-                encoder_hidden_states_llama3, nag_negative_encoder_hidden_states_llama,
-                trim_context=True,
-                dim=2,
-            )
+            encoder_hidden_states_llama3 = torch.cat((
+                encoder_hidden_states_llama3,
+                nag_negative_encoder_hidden_states_llama.to(encoder_hidden_states_llama3),
+            ), dim=0)
 
             forward_nag_ = self.forward_nag
             blocks_forward = list()
